@@ -1,0 +1,10 @@
+body {
+	background-color: #404040;
+	color: #eee;
+}
+.country {
+	fill: #ccc;
+	stroke: #666;
+	stroke-width: .1px;
+	stroke-linejoin: round;
+}

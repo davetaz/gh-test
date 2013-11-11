@@ -3,12 +3,14 @@
 queue()
     .defer(d3.json, "data/world-50m.json")
     .defer(d3.tsv, "data/world-country-names.tsv")
-    .defer(d3.csv, "data/data.csv")
+    .defer(d3.csv, config.data_file)
     .await(ready);
 
+var max_value = 0;
+
 // Set up map width and height
-var width  = map.height,
-    height = map.width;
+var width  = config.map_width,
+    height = config.map_height;
 
 // Initialise map projection, in this case mercator.
 // Lots more projection types are listed on https://github.com/mbostock/d3/wiki/Geo-Projections
@@ -43,10 +45,11 @@ function getColor(d,i){
 	overlaySatMax = 1,
 	overlayValMin = 0.95,
 	overlayValMax = 0.8;
-	if (d.odbdata === undefined) {
+	if (d.value === undefined) {
 		return d3.rgb(255,255,255);
 	} else {
-		var p = d.value / 40;
+		var p = ( d.value / max_value ) * config.color_multiplier;
+//		console.log( d.name + " (" + d.value + ") " + p + " (" + max_value + ")");
 		var h = overlayHueMin + p * (overlayHueMax - overlayHueMin);
 		var s = overlaySatMin + p * (overlaySatMax - overlaySatMin);
 		var v = overlayValMin + p * (overlayValMax - overlayValMin);
@@ -61,18 +64,25 @@ function ready(error, world, names, values) {
       n = countries.length;
 
   countries.forEach(function(d) { 
+
     var tryit = names.filter(function(n) { return d.id == n.id; })[0];
     if (typeof tryit === "undefined"){
-      console.log("Failed in match 1: " + d);
+//      console.log("Failed in match 1: " + d);
     } else {
       d.name = tryit.name; 
     }
+   
+    var local_max = 0; 
     var tryit2 = values.filter(function(n) { return d.name == n.Country; })[0];
     if (typeof tryit2 === "undefined"){
-//	console.log("Failed in match 2: " + d.name);
+	console.log("Failed to find data for: " + d.name);
     } else {
-    	d.value = tryit2["value"];
+	d.value = parseInt(tryit2[config.column_title].replace(/\,/g,''));
+	if (d.value > max_value) {
+		max_value = d.value;
+	}
     }
+
   });
 
 var country = svg.selectAll(".country").data(countries);
@@ -92,7 +102,7 @@ var country = svg.selectAll(".country").data(countries);
       })
       .on("click", function(d,i) {
 	// When you click on a country.
-	alert(d.name);
+	console.log(d.name + " " + d.value + " " + max_value);
       })
       .on("mouseout",  function(d,i) {
       	// When you leave the hover of a country.
