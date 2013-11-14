@@ -1,10 +1,12 @@
-body {
-	background-color: #404040;
-	color: #eee;
+header {
+    font-size: 2em;
+    color: white;
+    text-align: center;
+    background: #900;
+    padding: 0.2em;
 }
-.country {
-	fill: #ccc;
-	stroke: #666;
-	stroke-width: .1px;
-	stroke-linejoin: round;
+
+summary {
+	padding: 0.1em;
+	font-size: 1.2em;
 }
